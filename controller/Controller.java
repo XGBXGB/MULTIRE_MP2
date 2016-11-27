@@ -12,5 +12,6 @@ public class Controller {
 	public void doTwinComparison(String imagePath){
 		comparator.doTwinComparison(imagePath);
 		comparator.printAllSD();
+		comparator.printCameraBreaks();
 	}
 }

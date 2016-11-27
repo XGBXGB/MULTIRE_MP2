@@ -50,10 +50,10 @@ public class CompareHistograms
 	public void doTwinComparison(String imagePath){
 		boolean detectedGradualTransition = false;
 		
-		double T_sub_S = 8.0;	//EXPERIMENT
+		double T_sub_S = 540.0;	//EXPERIMENT
 		
-		double T_sub_B = computeTsubB(5, imagePath);	//5 -> EXPERIMENT
-		
+		double T_sub_B = computeTsubB(6, imagePath);	//5 -> EXPERIMENT
+		System.out.println("TsubB = "+T_sub_B);
 		
 		double transitionAccumulator = 0;
 		String gradTrans_prevFrame = "";
