@@ -12,11 +12,15 @@ public class CompareHistograms
 	private ArrayList<FrameSD> SD_of_frames;
 	private ArrayList<FrameSD> cameraBreaks;
 	
+	public CompareHistograms(){
+		SD_of_frames = new ArrayList();
+		cameraBreaks = new ArrayList();
+	}
 	
 	public double computeTsubB(int alpha, String imageSetPath){
 		File folder = new File(imageSetPath);
 		File[] fileList = folder.listFiles();
-		SD_of_frames = new ArrayList();
+		
 		double sum = 0;
 		for(int i=0; i<fileList.length-1; i++)
 		{
@@ -43,11 +47,13 @@ public class CompareHistograms
 		return mean + (alpha*sdev);
 	}
 	
-	public void doTwinComparison(){
+	public void doTwinComparison(String imagePath){
 		boolean detectedGradualTransition = false;
-		double T_sub_S = 8.0;
-		double T_sub_B = computeTsubB(5, "IMAGE SET PATH");
-		cameraBreaks = new ArrayList();
+		
+		double T_sub_S = 8.0;	//EXPERIMENT
+		
+		double T_sub_B = computeTsubB(5, imagePath);	//5 -> EXPERIMENT
+		
 		
 		double transitionAccumulator = 0;
 		String gradTrans_prevFrame = "";
@@ -72,6 +78,20 @@ public class CompareHistograms
 				}
 				transitionAccumulator = 0;
 			}
+		}
+	}
+	
+	public void printCameraBreaks(){
+		System.out.println("CAMERA BREAKS:");
+		for(int i=0; i<cameraBreaks.size(); i++){
+			System.out.println("Between "+cameraBreaks.get(i).getFrameName1()+" and "+cameraBreaks.get(i).getFrameName2());
+		}
+	}
+	
+	public void printAllSD(){
+		System.out.println("All SD:");
+		for(int i=0; i<SD_of_frames.size(); i++){
+			System.out.println("Between "+SD_of_frames.get(i).getFrameName1()+" and "+SD_of_frames.get(i).getFrameName2()+" == "+SD_of_frames.get(i).getValue());
 		}
 	}
 	
