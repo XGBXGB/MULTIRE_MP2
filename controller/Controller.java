@@ -13,5 +13,7 @@ public class Controller {
 		comparator.computeTwinCompare(imagePath);
 		comparator.printAllSD();
 		comparator.printCameraBreaks();
+		comparator.computeForKeyframes(imagePath);
+		comparator.printKeyframes();
 	}
 }

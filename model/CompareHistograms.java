@@ -11,11 +11,18 @@ public class CompareHistograms
 {
 	private ArrayList<FrameSD> SD_of_frames;
 	private ArrayList<FrameSD> cameraBreaks;
+	private ArrayList<Keyframe> keyframes;
 	private double T_sub_S;
 	
 	public CompareHistograms(){
 		SD_of_frames = new ArrayList();
 		cameraBreaks = new ArrayList();
+		keyframes = new ArrayList();
+	}
+	
+	public ArrayList<FrameSD> getCameraBreaks()
+	{
+		return cameraBreaks;
 	}
 	
 	public double computeTsubB(int alpha, String imageSetPath){
@@ -97,6 +104,14 @@ public class CompareHistograms
 		
 		return nH;
 	}*/
+	
+	public void computeForKeyframes(String imagePath)
+	{
+		for(int x = 0; x < cameraBreaks.size()-1; x++)
+		{
+			keyframes.add(getKeyframe(getShot(cameraBreaks.get(x), cameraBreaks.get(x+1), imagePath)));
+		}
+	}
 	
 	// get shot from 2 camera breaks
 	public ArrayList<ImageObject> getShot(FrameSD camBreak1, FrameSD camBreak2, String imageSetPath)
@@ -263,6 +278,13 @@ public class CompareHistograms
 		System.out.println("All SD:");
 		for(int i=0; i<SD_of_frames.size(); i++){
 			System.out.println("Between "+SD_of_frames.get(i).getFrameName1()+" and "+SD_of_frames.get(i).getFrameName2()+" == "+SD_of_frames.get(i).getValue());
+		}
+	}
+	
+	public void printKeyframes(){
+		System.out.println("All keyframes:");
+		for(int i=0; i<keyframes.size(); i++){
+			System.out.println(keyframes.get(i).getFilename() + " -> " + keyframes.get(i).getDistance());
 		}
 	}
 	
