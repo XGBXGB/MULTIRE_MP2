@@ -37,7 +37,7 @@ public class CompareHistograms
 				SD += Math.abs(sampleHistogram[j] - sampleHistogram2[j]);
 				sum += Math.abs(sampleHistogram[j] - sampleHistogram2[j]);
 			}
-			SD_of_frames.add(new FrameSD(sample.getFileName(), sample2.getFileName(), SD));
+			SD_of_frames.add(new FrameSD(sample.getFileName(), sample2.getFileName(), SD, i, i+1));
 		}
 		double mean = sum/SD_of_frames.size();
 		System.out.println("SDFsize: "+SD_of_frames.size()+" length:"+fileList.length);
@@ -86,7 +86,7 @@ public class CompareHistograms
 //		}
 //	}
 	
-	public double[] getNormalizedHistogram(int[] histogram, int imageWidth, int imageHeight)
+	/*public double[] getNormalizedHistogram(int[] histogram, int imageWidth, int imageHeight)
 	{
 		double[] nH = new double[159];
 		
@@ -96,6 +96,24 @@ public class CompareHistograms
 		}
 		
 		return nH;
+	}*/
+	
+	// get shot from 2 camera breaks
+	public ArrayList<ImageObject> getShot(FrameSD camBreak1, FrameSD camBreak2, String imageSetPath)
+	{
+		ArrayList<ImageObject> shot = new ArrayList<ImageObject>();
+		
+		File folder = new File(imageSetPath);
+		File[] fileList = folder.listFiles();
+		double sum = 0;
+		for(int i=camBreak1.getIndexF2(); i<camBreak2.getIndexF2(); i++)
+		{
+			ImageObject sample = new ImageObject(imageSetPath, fileList[i].getName());
+			sample.initializeHistogram();
+			shot.add(sample);
+		}
+		
+		return shot;
 	}
 	
 	public int[] computeAvgHist(ArrayList<ImageObject> shot)
@@ -183,7 +201,7 @@ public class CompareHistograms
 			
 			if(SD > T_sub_B){
 				System.out.println("WEW");
-				cameraBreaks.add(new FrameSD(sample.getFileName(), sample2.getFileName(), SD));
+				cameraBreaks.add(new FrameSD(sample.getFileName(), sample2.getFileName(), SD, i, i+1));
 			}else if(!detectedGradualTransition && (SD > T_sub_S && SD <= T_sub_B)){
 				System.out.println("Chosen FS_Frame "+fileList[i+1].getName());
 				Fs_Frame = new ImageObject(imageSetPath, fileList[i+1].getName());
@@ -219,7 +237,7 @@ public class CompareHistograms
 					if(transitionAccumulator > T_sub_B){
 						System.out.println("Accumulator > TsubB");
 						detectedGradualTransition = false;
-						cameraBreaks.add(new FrameSD(Fs_Frame.getFileName(), Fe_Frame.getFileName(), transitionAccumulator));
+						cameraBreaks.add(new FrameSD(Fs_Frame.getFileName(), Fe_Frame.getFileName(), transitionAccumulator, i, i+1));
 						transitionAccumulator = 0;
 					}else{
 						System.out.println("allowance == 0");
