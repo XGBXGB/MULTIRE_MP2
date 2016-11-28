@@ -86,6 +86,74 @@ public class CompareHistograms
 //		}
 //	}
 	
+	public double[] getNormalizedHistogram(int[] histogram, int imageWidth, int imageHeight)
+	{
+		double[] nH = new double[159];
+		
+		for(int i=0; i<159; i++)
+		{
+			nH[i] = (double)histogram[i]/(imageWidth*imageHeight);
+		}
+		
+		return nH;
+	}
+	
+	public int[] computeAvgHist(ArrayList<ImageObject> shot)
+	{
+		// assumed na normalized na yung hist ng nasa shot
+		int[] aHist = new int[159];
+		
+		//initialize avg hist
+		for(int x = 0; x < 159; x++)
+		{
+			aHist[x] = 0;
+		}
+		
+		//add all pixels of shot
+		for(int x = 0; x < shot.size(); x++)
+		{
+			for(int y = 0; y < 159; y++)
+			{
+				aHist[y] += shot.get(x).getHistogram()[y];
+			}
+		}
+		
+		// average all pixels
+		for(int x = 0; x < 159; x++)
+		{
+			aHist[x] /= shot.size();
+		}
+		
+		return aHist;
+		
+	}
+	
+	public Keyframe getKeyframe(ArrayList<ImageObject> shot)
+	{
+		int[] aHist = computeAvgHist(shot);
+		Keyframe key = new Keyframe();
+		int SD = 0;
+		boolean first = true;
+		
+		// loop sa lahat ng nasa shot
+		for(int x = 0; x < shot.size(); x++)
+		{
+			SD = 0;
+			for(int j=0; j<aHist.length; j++){
+				SD += Math.abs(aHist[j] - shot.get(x).getHistogram()[j]);
+			}
+			if(first || (!first && key.getDistance() > SD))
+			{
+				key.setDistance(SD);
+				key.setFilename(shot.get(x).getFileName());
+			}
+			
+			first = false;
+		}
+		
+		return key;
+	}
+	
 	public void computeTwinCompare(String imageSetPath){
 		boolean detectedGradualTransition = false;
 		double T_sub_B = computeTsubB(7, imageSetPath);	
