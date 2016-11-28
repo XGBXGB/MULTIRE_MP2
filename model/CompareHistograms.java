@@ -11,6 +11,7 @@ public class CompareHistograms
 {
 	private ArrayList<FrameSD> SD_of_frames;
 	private ArrayList<FrameSD> cameraBreaks;
+	private double T_sub_S;
 	
 	public CompareHistograms(){
 		SD_of_frames = new ArrayList();
@@ -38,12 +39,16 @@ public class CompareHistograms
 			}
 			SD_of_frames.add(new FrameSD(sample.getFileName(), sample2.getFileName(), SD));
 		}
-		double mean = sum/fileList.length;
+		double mean = sum/SD_of_frames.size();
+		System.out.println("SDFsize: "+SD_of_frames.size()+" length:"+fileList.length);
+		System.out.println("mean: "+mean);
 		double temp = 0;
 		for(FrameSD a :SD_of_frames){//Variance
             temp += (a.getValue()-mean)*(a.getValue()-mean);
 		}
 		double sdev = Math.sqrt(temp/SD_of_frames.size());
+		T_sub_S = mean+(0.1*sdev);
+		System.out.println("Sdev: "+sdev);
 		return mean + (alpha*sdev);
 	}
 	
@@ -81,18 +86,21 @@ public class CompareHistograms
 //		}
 //	}
 	
-	public void computeTwinCompare(int alpha, String imageSetPath){
-		double T_sub_B = computeTsubB(alpha, imageSetPath);	
-		
+	public void computeTwinCompare(String imageSetPath){
+		boolean detectedGradualTransition = false;
+		double T_sub_B = computeTsubB(7, imageSetPath);	
+		System.out.println("TsubB: "+T_sub_B);
+		System.out.println("TsubS: "+T_sub_S);
+		int allowance = 3;
+		ImageObject Fs_Frame = null;
+		ImageObject Fe_Frame = null;
+		double transitionAccumulator = 0;
 		File folder = new File(imageSetPath);
 		File[] fileList = folder.listFiles();
-		
 		double sum = 0;
 		for(int i=0; i<fileList.length-1; i++)
 		{
 			//implement dito lahat, mga if else, tapos yung gradual transition and shit
-			
-			
 			ImageObject sample = new ImageObject(imageSetPath, fileList[i].getName());
 			sample.initializeHistogram();
 			int[] sampleHistogram = sample.getHistogram();
@@ -103,9 +111,58 @@ public class CompareHistograms
 			double SD = 0;
 			for(int j=0; j<sampleHistogram.length; j++){
 				SD += Math.abs(sampleHistogram[j] - sampleHistogram2[j]);
-				sum += Math.abs(sampleHistogram[j] - sampleHistogram2[j]);
 			}
-			SD_of_frames.add(new FrameSD(sample.getFileName(), sample2.getFileName(), SD));
+			
+			if(SD > T_sub_B){
+				System.out.println("WEW");
+				cameraBreaks.add(new FrameSD(sample.getFileName(), sample2.getFileName(), SD));
+			}else if(!detectedGradualTransition && (SD > T_sub_S && SD <= T_sub_B)){
+				System.out.println("Chosen FS_Frame "+fileList[i+1].getName());
+				Fs_Frame = new ImageObject(imageSetPath, fileList[i+1].getName());
+				Fs_Frame.initializeHistogram();
+				detectedGradualTransition = true;
+			}else if(detectedGradualTransition && (SD > T_sub_S && SD <= T_sub_B)){
+				System.out.println("compared FS_Frame w/"+sample2.getFileName());
+				Fe_Frame = new ImageObject(imageSetPath, fileList[i+1].getName());
+				int[] FSHistogram = Fs_Frame.getHistogram();
+				
+				double tempSD = 0;
+				for(int z=0; z<FSHistogram.length; z++){
+					tempSD += Math.abs(FSHistogram[z] - sampleHistogram2[z]);
+				}
+				transitionAccumulator += tempSD;
+				
+			}else if(detectedGradualTransition && SD <= T_sub_S){
+				System.out.println("Less than TsubS");
+				if(allowance>0){
+					System.out.println("allowance > 0");
+					System.out.println("compared FS_Frame w/"+sample2.getFileName());
+					Fe_Frame = new ImageObject(imageSetPath, fileList[i+1].getName());
+					allowance--;
+					System.out.println("Allowance: "+allowance);
+					int[] FSHistogram = Fs_Frame.getHistogram();
+					double tempSD = 0;
+					for(int z=0; z<FSHistogram.length; z++){
+						tempSD += Math.abs(FSHistogram[z] - sampleHistogram2[z]);
+					}
+					transitionAccumulator += tempSD;
+				}
+				else if(allowance==0){
+					if(transitionAccumulator > T_sub_B){
+						System.out.println("Accumulator > TsubB");
+						detectedGradualTransition = false;
+						cameraBreaks.add(new FrameSD(Fs_Frame.getFileName(), Fe_Frame.getFileName(), transitionAccumulator));
+						transitionAccumulator = 0;
+					}else{
+						System.out.println("allowance == 0");
+						allowance=3;
+						Fs_Frame = null;
+						Fe_Frame = null;
+						detectedGradualTransition = false;
+						transitionAccumulator = 0;
+					}
+				}
+			}
 		}
 	}
 	
