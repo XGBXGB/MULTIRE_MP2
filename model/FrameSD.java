@@ -6,6 +6,7 @@ public class FrameSD {
 	private double value;
 	private int indexF1;
 	private int indexF2;
+	private String type;
 	
 	
 	public FrameSD(String frameName1, String frameName2, double value, int indexF1, int indexF2) {
@@ -14,11 +15,23 @@ public class FrameSD {
 		this.value = value;
 		this.indexF1 = indexF1;
 		this.indexF2 = indexF2;
-		
+		this.type = "";
 	}
 	
 	
 	
+	public String getType() {
+		return type;
+	}
+
+
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+
+
 	public int getIndexF1() {
 		return indexF1;
 	}

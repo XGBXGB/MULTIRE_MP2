@@ -11,7 +11,7 @@ public class Controller {
 	
 	public void doTwinComparison(String imagePath){
 		comparator.computeTwinCompare(imagePath);
-		comparator.printAllSD();
+		//comparator.printAllSD();
 		comparator.printCameraBreaks();
 		comparator.computeForKeyframes(imagePath);
 		comparator.printKeyframes();

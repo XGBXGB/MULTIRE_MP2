@@ -109,7 +109,18 @@ public class CompareHistograms
 	{
 		for(int x = 0; x < cameraBreaks.size()-1; x++)
 		{
-			keyframes.add(getKeyframe(getShot(cameraBreaks.get(x), cameraBreaks.get(x+1), imagePath)));
+			if(cameraBreaks.get(x).getType().equals("Abrupt"))
+			{
+				keyframes.add(getKeyframe(getShot(cameraBreaks.get(x), cameraBreaks.get(x+1), imagePath)));
+				keyframes.get(keyframes.size()-1).setLowerBoundary(cameraBreaks.get(x).getFrameName1());
+				keyframes.get(keyframes.size()-1).setUpperBoundary(cameraBreaks.get(x+1).getFrameName1());
+			}
+			else
+			{
+				keyframes.add(getKeyframe(getShot(cameraBreaks.get(x), cameraBreaks.get(x), imagePath)));
+				keyframes.get(keyframes.size()-1).setLowerBoundary(cameraBreaks.get(x).getFrameName1());
+				keyframes.get(keyframes.size()-1).setUpperBoundary(cameraBreaks.get(x).getFrameName2());
+			}
 		}
 	}
 	
@@ -121,7 +132,7 @@ public class CompareHistograms
 		File folder = new File(imageSetPath);
 		File[] fileList = folder.listFiles();
 		double sum = 0;
-		for(int i=camBreak1.getIndexF2(); i<camBreak2.getIndexF2(); i++)
+		for(int i=camBreak1.getIndexF1(); i<camBreak2.getIndexF2(); i++)
 		{
 			ImageObject sample = new ImageObject(imageSetPath, fileList[i].getName());
 			sample.initializeHistogram();
@@ -195,6 +206,8 @@ public class CompareHistograms
 		int allowance = 3;
 		ImageObject Fs_Frame = null;
 		ImageObject Fe_Frame = null;
+		int FsIndex = 0;
+		int FeIndex = 0;
 		double transitionAccumulator = 0;
 		File folder = new File(imageSetPath);
 		File[] fileList = folder.listFiles();
@@ -217,16 +230,18 @@ public class CompareHistograms
 			if(SD > T_sub_B){
 				System.out.println("WEW");
 				cameraBreaks.add(new FrameSD(sample.getFileName(), sample2.getFileName(), SD, i, i+1));
+				cameraBreaks.get(cameraBreaks.size()-1).setType("Abrupt");
 			}else if(!detectedGradualTransition && (SD > T_sub_S && SD <= T_sub_B)){
 				System.out.println("Chosen FS_Frame "+fileList[i+1].getName());
 				Fs_Frame = new ImageObject(imageSetPath, fileList[i+1].getName());
 				Fs_Frame.initializeHistogram();
+				FsIndex = i;
 				detectedGradualTransition = true;
 			}else if(detectedGradualTransition && (SD > T_sub_S && SD <= T_sub_B)){
 				System.out.println("compared FS_Frame w/"+sample2.getFileName());
 				Fe_Frame = new ImageObject(imageSetPath, fileList[i+1].getName());
 				int[] FSHistogram = Fs_Frame.getHistogram();
-				
+				FeIndex = i;
 				double tempSD = 0;
 				for(int z=0; z<FSHistogram.length; z++){
 					tempSD += Math.abs(FSHistogram[z] - sampleHistogram2[z]);
@@ -239,6 +254,7 @@ public class CompareHistograms
 					System.out.println("allowance > 0");
 					System.out.println("compared FS_Frame w/"+sample2.getFileName());
 					Fe_Frame = new ImageObject(imageSetPath, fileList[i+1].getName());
+					FeIndex = i;
 					allowance--;
 					System.out.println("Allowance: "+allowance);
 					int[] FSHistogram = Fs_Frame.getHistogram();
@@ -252,13 +268,16 @@ public class CompareHistograms
 					if(transitionAccumulator > T_sub_B){
 						System.out.println("Accumulator > TsubB");
 						detectedGradualTransition = false;
-						cameraBreaks.add(new FrameSD(Fs_Frame.getFileName(), Fe_Frame.getFileName(), transitionAccumulator, i, i+1));
+						cameraBreaks.add(new FrameSD(Fs_Frame.getFileName(), Fe_Frame.getFileName(), transitionAccumulator, FsIndex, FeIndex));
+						cameraBreaks.get(cameraBreaks.size()-1).setType("Gradual");
 						transitionAccumulator = 0;
 					}else{
 						System.out.println("allowance == 0");
 						allowance=3;
 						Fs_Frame = null;
+						FsIndex = 0;
 						Fe_Frame = null;
+						FeIndex = 0;
 						detectedGradualTransition = false;
 						transitionAccumulator = 0;
 					}
@@ -270,7 +289,7 @@ public class CompareHistograms
 	public void printCameraBreaks(){
 		System.out.println("CAMERA BREAKS:");
 		for(int i=0; i<cameraBreaks.size(); i++){
-			System.out.println("Between "+cameraBreaks.get(i).getFrameName1()+" and "+cameraBreaks.get(i).getFrameName2());
+			System.out.println("Between "+cameraBreaks.get(i).getFrameName1()+" and "+cameraBreaks.get(i).getFrameName2() + " -> " + cameraBreaks.get(i).getType());
 		}
 	}
 	
@@ -284,7 +303,8 @@ public class CompareHistograms
 	public void printKeyframes(){
 		System.out.println("All keyframes:");
 		for(int i=0; i<keyframes.size(); i++){
-			System.out.println(keyframes.get(i).getFilename() + " -> " + keyframes.get(i).getDistance());
+			System.out.println("From: "+ keyframes.get(i).getLowerBoundary() + " to " 
+					+ keyframes.get(i).getUpperBoundary() + ": " + keyframes.get(i).getFilename() + " -> " + keyframes.get(i).getDistance());
 		}
 	}
 	
