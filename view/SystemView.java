@@ -269,11 +269,11 @@ public class SystemView extends JFrame implements ActionListener {
 			
 			if( cb_imageSets.getSelectedItem().equals("CUSTOM") )
 			{
-				controller.doTwinComparison(alpha, ts, imagesRepository);
+				controller.processVideo(alpha, ts, imagesRepository);
 			}
 			else
 			{
-				controller.preprocessedDoTwinComparison(alpha, ts, cb_imageSets.getSelectedIndex());
+				controller.preprocessedProcessVideo(alpha, ts, cb_imageSets.getSelectedIndex());
 			}
 			
 			displayResults(controller.getAllCameraBreaks(), controller.getAllKeyFrames());

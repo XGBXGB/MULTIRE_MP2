@@ -5,16 +5,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
-import model.CenteringTest.Data;
-
-public class CompareHistograms
+public class VideoProcessor
 {
 	private ArrayList<FrameSD> SD_of_frames;
 	private ArrayList<FrameSD> cameraBreaks;
 	private ArrayList<Keyframe> keyframes;
 	private double T_sub_S;
 
-	public CompareHistograms()
+	public VideoProcessor()
 	{
 		SD_of_frames = new ArrayList();
 		cameraBreaks = new ArrayList();
@@ -99,54 +97,7 @@ public class CompareHistograms
 		return mean + (alpha * sdev);
 	}
 	
-	// public void doTwinComparison(String imagePath){
-	// boolean detectedGradualTransition = false;
-	//
-	// double T_sub_S = 540.0; //EXPERIMENT
-	//
-	// double T_sub_B = computeTsubB(6, imagePath); //5 -> EXPERIMENT
-	// System.out.println("TsubB = "+T_sub_B);
-	//
-	// double transitionAccumulator = 0;
-	// String gradTrans_prevFrame = "";
-	// String gradTrans_nextFrame = "";
-	//
-	// for(int i=0; i<SD_of_frames.size(); i++){
-	// FrameSD current = SD_of_frames.get(i);
-	// if(SD_of_frames.get(i).getValue() > T_sub_B){
-	// cameraBreaks.add(new FrameSD(current.getFrameName1(),
-	// current.getFrameName2(), current.getValue()));
-	// }else if(SD_of_frames.get(i).getValue() > T_sub_S &&
-	// SD_of_frames.get(i).getValue() <= T_sub_B){
-	// gradTrans_prevFrame = current.getFrameName1();
-	// detectedGradualTransition = true;
-	// transitionAccumulator += current.getValue();
-	// }else if(detectedGradualTransition && (SD_of_frames.get(i).getValue() >
-	// T_sub_S && SD_of_frames.get(i).getValue() <= T_sub_B)){
-	// transitionAccumulator += current.getValue();
-	// }else if(detectedGradualTransition && SD_of_frames.get(i).getValue() <=
-	// T_sub_S){
-	// gradTrans_nextFrame = current.getFrameName2();
-	// detectedGradualTransition = false;
-	// transitionAccumulator += current.getValue();
-	// if(transitionAccumulator > T_sub_B){
-	// cameraBreaks.add(new FrameSD(gradTrans_prevFrame, gradTrans_nextFrame,
-	// transitionAccumulator));
-	// }
-	// transitionAccumulator = 0;
-	// }
-	// }
-	// }
-
-	/*
-	 * public double[] getNormalizedHistogram(int[] histogram, int imageWidth,
-	 * int imageHeight) { double[] nH = new double[159];
-	 * 
-	 * for(int i=0; i<159; i++) { nH[i] =
-	 * (double)histogram[i]/(imageWidth*imageHeight); }
-	 * 
-	 * return nH; }
-	 */
+	
 
 	public void computeForKeyframes(String imagePath)
 	{
@@ -275,7 +226,7 @@ public class CompareHistograms
 		return key;
 	}
 
-	public void computeTwinCompare(int alpha, double ts, String imageSetPath)
+	public void doTwinCompare(int alpha, double ts, String imageSetPath)
 	{
 		boolean detectedGradualTransition = false;
 		double T_sub_B = computeTsubB(alpha, imageSetPath);
@@ -310,7 +261,6 @@ public class CompareHistograms
 			// System.out.println("SD: " + SD);
 			if (SD > T_sub_B)
 			{
-				System.out.println("WEW");
 				cameraBreaks.add(new FrameSD(sample.getFileName(), sample2.getFileName(), SD, i, i + 1));
 				cameraBreaks.get(cameraBreaks.size() - 1).setType("Abrupt");
 			}

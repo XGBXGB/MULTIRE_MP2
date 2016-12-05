@@ -2,33 +2,33 @@ package controller;
 
 import java.util.ArrayList;
 
-import model.CompareHistograms;
+import model.VideoProcessor;
 import model.FrameSD;
 import model.ImageObject;
 import model.Keyframe;
 import preprocess.Load;
 
 public class Controller {
-	CompareHistograms comparator;
+	VideoProcessor comparator;
 	Load load;
 	
 	public Controller(){
-		comparator = new CompareHistograms();
+		comparator = new VideoProcessor();
 		load = new Load();
 	}
 	
-	public void doTwinComparison(int alpha, double ts, String imagePath){
-		comparator = new CompareHistograms();
-		comparator.computeTwinCompare(alpha, ts, imagePath);
+	public void processVideo(int alpha, double ts, String imagePath){
+		comparator = new VideoProcessor();
+		comparator.doTwinCompare(alpha, ts, imagePath);
 		//comparator.printAllSD();
 		comparator.printCameraBreaks();
 		comparator.computeForKeyframes(imagePath);
 		comparator.printKeyframes();
 	}
 	
-	public void preprocessedDoTwinComparison( int alpha, double ts, int imageSetChoice )
+	public void preprocessedProcessVideo( int alpha, double ts, int imageSetChoice )
 	{
-		comparator = new CompareHistograms();
+		comparator = new VideoProcessor();
 		ArrayList<ImageObject> images = new ArrayList<>(0);
 		
 		switch( imageSetChoice )
