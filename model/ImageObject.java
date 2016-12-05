@@ -25,7 +25,7 @@ import java.util.Scanner;
 import javax.swing.*;
 import java.awt.image.ColorModel;
 
-class ImageObject {
+public class ImageObject {
 
 	String path;
 	String fileName;
@@ -62,6 +62,13 @@ class ImageObject {
 	// picLabel.setBounds(0, 0, 500, 500);
 	// mainPanel.add(picLabel);
 	// }
+	
+	public ImageObject( String fileName, int[] histogram )
+	{
+		this.fileName = fileName;
+		this.histogram = histogram;
+	}
+	
 	public ImageObject(String path, String fileName) {
 		this.path = path;
 		this.fileName = fileName;
